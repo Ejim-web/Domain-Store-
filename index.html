@@ -1,1 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Domain Store – Register Domains</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #059669, #047857);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #1e293b;
+            font-weight: 500;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover {
+            color: #059669;
+        }
+
+        .btn-outline {
+            border: 1px solid #cbd5e1;
+            padding: 8px 20px;
+            border-radius: 40px;
+            background: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #047857;
+            transform: scale(1.02);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            padding: 8px 24px;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        /* Auth forms */
+        .auth-container {
+            max-width: 400px;
+            margin: 60px auto;
+            background: white;
+            border-radius: 32px;
+            padding: 40px;
+            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .auth-container input {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            border: 1px solid #cbd5e1;
+            border-radius: 60px;
+            font-size: 16px;
+        }
+
+        .auth-container button {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .auth-toggle {
+            margin-top: 20px;
+            color: #059669;
+            cursor: pointer;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f1f5f9;
+            padding: 6px 16px;
+            border-radius: 60px;
+        }
+
+        .user-email {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Main app (hidden until login) */
+        .main-app {
+            display: none;
+        }
+
+        /* Search card */
+        .search-card {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 80px;
+            padding: 8px;
+            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .search-card input {
+            flex: 1;
+            padding: 16px 24px;
+            border: none;
+            font-size: 18px;
+            border-radius: 60px;
+            outline: none;
+        }
+
+        .search-card select {
+            padding: 0 16px;
+            border: none;
+            background: #f1f5f9;
+            border-radius: 40px;
+            font-weight: 500;
+            outline: none;
+        }
+
+        .search-card button {
+            background: #059669;
+            border: none;
+            padding: 0 32px;
+            border-radius: 60px;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .result-message {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: 500;
+        }
+
+        /* Pricing cards */
+        .pricing {
+            padding: 60px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 48px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 32px;
+            padding: 32px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+            text-align: center;
+        }
+
+        .card h3 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .price {
+            font-size: 36px;
+            font-weight: 800;
+            color: #059669;
+            margin: 20px 0;
+        }
+
+        .price small {
+            font-size: 14px;
+            font-weight: normal;
+            color: #64748b;
+        }
+
+        .card ul {
+            text-align: left;
+            margin: 24px 0;
+            list-style: none;
+        }
+
+        .card li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card li::before {
+            content: "✓";
+            color: #059669;
+            font-weight: bold;
+        }
+
+        /* Cart sidebar */
+        .cart-sidebar {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 320px;
+            padding: 20px;
+            z-index: 200;
+            border: 1px solid #e2e8f0;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .cart-sidebar h4 {
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+
+        .cart-items {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .cart-total {
+            font-weight: bold;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        .checkout-btn {
+            background: #059669;
+            color: white;
+            width: 100%;
+            border: none;
+            padding: 10px;
+            border-radius: 40px;
+            font-weight: bold;
+            margin-top: 12px;
+            cursor: pointer;
+        }
+
+        .remove-item {
+            background: none;
+            border: none;
+            color: #dc2626;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* Footer */
+        .footer {
+            background: #0f172a;
+            color: #cbd5e1;
+            padding: 48px 0;
+            margin-top: 60px;
+        }
+
+        .footer a {
+            color: #94a3b8;
+            text-decoration: none;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 40px;
+        }
+
+        @media (max-width: 640px) {
+            .hero h1 { font-size: 32px; }
+            .search-card { flex-direction: column; border-radius: 32px; background: transparent; box-shadow: none; gap: 12px; }
+            .cart-sidebar { width: 90%; right: 5%; left: 5%; bottom: 10px; }
+        }
+    </style>
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBBmh19VEndcv1pV40M-V3Tcov1EeKodT0",
+            authDomain: "domain-store-8f13e.firebaseapp.com",
+            projectId: "domain-store-8f13e",
+            storageBucket: "domain-store-8f13e.firebasestorage.app",
+            messagingSenderId: "237833593498",
+            appId: "1:237833593498:web:8e58f6c38c53def132f523",
+            measurementId: "G-5ZXEBH13WW"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // NameSilo API
+        const NAMESILO_API_KEY = "e48b425c9814c23b04a2c71";
+        const NAMESILO_API_URL = "https://www.namesilo.com/api/";
+
+        async function callNameSiloAPI(command, params = {}) {
+            const urlParams = new URLSearchParams({
+                version: 1,
+                type: "xml",
+                key: NAMESILO_API_KEY,
+                command: command,
+                ...params
+            });
+            const url = `${NAMESILO_API_URL}${command}?${urlParams.toString()}`;
+            try {
+                const response = await fetch(url);
+                const text = await response.text();
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(text, "text/xml");
+                const replyCode = xmlDoc.querySelector("replycode")?.textContent;
+                if (replyCode !== "300") {
+                    const detail = xmlDoc.querySelector("detail")?.textContent || "Unknown error";
+                    throw new Error(detail);
+                }
+                return xmlDoc;
+            } catch (error) {
+                console.error("API Error:", error);
+                throw error;
+            }
+        }
+
+        async function checkAvailability(domain, tld) {
+            const fullDomain = domain.toLowerCase() + tld;
+            try {
+                const xmlDoc = await callNameSiloAPI("checkRegisterAvailability", { domain: fullDomain });
+                const available = xmlDoc.querySelector("available")?.textContent === "yes";
+                const price = xmlDoc.querySelector("price")?.textContent || "0";
+                if (available) {
+                    return { available: true, message: `🎉 ${fullDomain} is available!`, price: parseFloat(price) };
+                } else {
+                    return { available: false, message: `${fullDomain} is already taken.` };
+                }
+            } catch (error) {
+                return { available: false, message: `Error checking ${fullDomain}.` };
+            }
+        }
+
+        // Global state
+        let currentUser = null;
+        let cart = [];
+
+        // DOM elements
+        const authContainer = document.getElementById('authContainer');
+        const mainApp = document.getElementById('mainApp');
+        const userEmailSpan = document.getElementById('userEmail');
+        const cartCountSpan = document.getElementById('cartCount');
+        const cartItemsList = document.getElementById('cartItemsList');
+        const cartTotalSpan = document.getElementById('cartTotal');
+        const cartSidebar = document.getElementById('cartSidebar');
+
+        function updateCartUI() {
+            if (!cartCountSpan) return;
+            cartCountSpan.innerText = cart.length;
+            if (cartItemsList) {
+                if (cart.length === 0) {
+                    cartItemsList.innerHTML = '<div style="color: #64748b;">Your cart is empty</div>';
+                } else {
+                    cartItemsList.innerHTML = cart.map((item, idx) => `
+                        <div class="cart-item">
+                            <span>${item.domain || item.tld}</span>
+                            <span>₦${item.price.toLocaleString()}</span>
+                            <button class="remove-item" data-index="${idx}">✕</button>
+                        </div>
+                    `).join('');
+                    document.querySelectorAll('.remove-item').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const idx = parseInt(btn.getAttribute('data-index'));
+                            cart.splice(idx, 1);
+                            updateCartUI();
+                            saveCartToFirestore();
+                        });
+                    });
+                }
+            }
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            if (cartTotalSpan) cartTotalSpan.innerText = total.toLocaleString();
+        }
+
+        async function saveCartToFirestore() {
+            if (currentUser) {
+                const userCartRef = doc(db, "carts", currentUser.uid);
+                await setDoc(userCartRef, { items: cart, updatedAt: new Date() });
+            }
+        }
+
+        async function loadCartFromFirestore() {
+            if (currentUser) {
+                const userCartRef = doc(db, "carts", currentUser.uid);
+                const cartDoc = await getDoc(userCartRef);
+                if (cartDoc.exists()) {
+                    cart = cartDoc.data().items || [];
+                } else {
+                    cart = [];
+                }
+                updateCartUI();
+            }
+        }
+
+        function addToCart(tld, price, domainName = null) {
+            const displayName = domainName ? `${domainName}${tld}` : tld;
+            cart.push({ tld, price, domain: displayName });
+            updateCartUI();
+            saveCartToFirestore();
+            if (cartSidebar) cartSidebar.style.display = 'block';
+        }
+
+        // Auth handlers
+        window.showLogin = () => {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('signupForm').style.display = 'none';
+        };
+        window.showSignup = () => {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('signupForm').style.display = 'block';
+        };
+        window.doLogin = async () => {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                alert(error.message);
+            }
+        };
+        window.doSignup = async () => {
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                alert(error.message);
+            }
+        };
+        window.doLogout = async () => {
+            await signOut(auth);
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            if (user) {
+                authContainer.style.display = 'none';
+                mainApp.style.display = 'block';
+                userEmailSpan.innerText = user.email;
+                await loadCartFromFirestore();
+            } else {
+                authContainer.style.display = 'block';
+                mainApp.style.display = 'none';
+                cart = [];
+                updateCartUI();
+            }
+        });
+
+        // Search handler
+        document.getElementById('searchBtn')?.addEventListener('click', async () => {
+            const domainInput = document.getElementById('domainInput');
+            const tldSelect = document.getElementById('tldSelect');
+            const resultDiv = document.getElementById('searchResult');
+            const domain = domainInput.value.trim();
+            const tld = tldSelect.value;
+            if (!domain) {
+                resultDiv.innerHTML = '<span style="color: #dc2626;">Please enter a domain name</span>';
+                return;
+            }
+            resultDiv.innerHTML = '<span>🔍 Checking availability...</span>';
+            const result = await checkAvailability(domain, tld);
+            if (result.available) {
+                resultDiv.innerHTML = `
+                    <span style="color: #059669;">${result.message}</span><br>
+                    <button id="addFromSearchBtn" style="margin-top: 10px; background: #059669; color: white; border: none; padding: 6px 18px; border-radius: 30px; cursor: pointer;">Add to Cart (₦${result.price.toLocaleString()})</button>
+                `;
+                const addBtn = document.getElementById('addFromSearchBtn');
+                if (addBtn) {
+                    addBtn.addEventListener('click', () => {
+                        addToCart(tld, result.price, domain);
+                        resultDiv.innerHTML += `<br><span style="color: #059669;">✅ Added to cart!</span>`;
+                    });
+                }
+            } else {
+                resultDiv.innerHTML = `<span style="color: #dc2626;">${result.message}</span>`;
+            }
+        });
+
+        document.querySelectorAll('.add-to-cart').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const card = btn.closest('.card');
+                const tld = card.getAttribute('data-tld');
+                const price = parseInt(card.getAttribute('data-price'));
+                addToCart(tld, price);
+            });
+        });
+
+        document.getElementById('viewCartBtn')?.addEventListener('click', () => {
+            cartSidebar.style.display = cartSidebar.style.display === 'none' ? 'block' : 'none';
+        });
+
+        document.getElementById('checkoutBtn')?.addEventListener('click', () => {
+            if (cart.length === 0) {
+                alert('Your cart is empty.');
+                return;
+            }
+            alert('✅ Checkout initiated! In production, you would integrate Paystack/Flutterwave here.\nAfter payment, domains would be registered via NameSilo API.');
+            // In production: call NameSilo API to register domains after successful payment
+        });
+    </script>
+</head>
+<body>
+    <!-- Auth Container -->
+    <div id="authContainer" class="auth-container">
+        <div class="logo" style="margin-bottom: 20px;">Domain Store</div>
+        
+        <div id="loginForm">
+            <h2>Login</h2>
+            <input type="email" id="loginEmail" placeholder="Email">
+            <input type="password" id="loginPassword" placeholder="Password">
+            <button class="btn-primary" onclick="doLogin()">Login</button>
+            <div class="auth-toggle" onclick="showSignup()">Don't have an account? Sign up</div>
+        </div>
+        
+        <div id="signupForm" style="display: none;">
+            <h2>Sign Up</h2>
+            <input type="email" id="signupEmail" placeholder="Email">
+            <input type="password" id="signupPassword" placeholder="Password">
+            <button class="btn-primary" onclick="doSignup()">Sign Up</button>
+            <div class="auth-toggle" onclick="showLogin()">Already have an account? Login</div>
+        </div>
+    </div>
+
+    <!-- Main App (visible after login) -->
+    <div id="mainApp" class="main-app">
+        <div class="header">
+            <div class="container">
+                <div class="nav">
+                    <div class="logo">Domain Store</div>
+                    <div class="nav-links">
+                        <a href="#">Domains</a>
+                        <a href="#">Hosting</a>
+                        <a href="#">Reseller</a>
+                        <div class="user-info">
+                            <span class="user-email" id="userEmail"></span>
+                            <button class="btn-outline" onclick="doLogout()">Logout</button>
+                        </div>
+                        <button class="btn-outline" id="viewCartBtn">🛒 Cart (<span id="cartCount">0</span>)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="hero">
+                <h1>Find your perfect domain name</h1>
+                <p>Register domains, manage DNS, and grow your brand online.</p>
+                <div class="search-card">
+                    <input type="text" id="domainInput" placeholder="Search for your domain..." value="mystore">
+                    <select id="tldSelect">
+                        <option value=".com">.com</option>
+                        <option value=".com.ng">.com.ng</option>
+                        <option value=".ng">.ng</option>
+                        <option value=".net">.net</option>
+                        <option value=".org">.org</option>
+                    </select>
+                    <button id="searchBtn">Search</button>
+                </div>
+                <div id="searchResult" class="result-message"></div>
+            </div>
+
+            <div class="pricing">
+                <h2 class="section-title">Popular Domains – Great Prices</h2>
+                <div class="cards">
+                    <div class="card" data-tld=".com" data-price="9500">
+                        <h3>.com</h3>
+                        <div class="price">₦9,500 <small>/year</small></div>
+                        <ul>
+                            <li>Free privacy protection</li>
+                            <li>Free DNS management</li>
+                            <li>24/7 support</li>
+                        </ul>
+                        <button class="btn-secondary add-to-cart" data-tld=".com" data-price="9500">Add to Cart</button>
+                    </div>
+                    <div class="card" data-tld=".com.ng" data-price="2500">
+                        <h3>.com.ng</h3>
+                        <div class="price">₦2,500 <small>/year</small></div>
+                        <ul>
+                            <li>Local recognition</li>
+                            <li>Free WHOIS privacy</li>
+                            <li>Easy transfer</li>
+                        </ul>
+                        <button class="btn-secondary add-to-cart" data-tld=".com.ng" data-price="2500">Add to Cart</button>
+                    </div>
+                    <div class="card" data-tld=".ng" data-price="6500">
+                        <h3>.ng</h3>
+                        <div class="price">₦6,500 <small>/year</small></div>
+                        <ul>
+                            <li>Short & memorable</li>
+                            <li>NiRA accredited</li>
+                            <li>Fast activation</li>
+                        </ul>
+                        <button class="btn-secondary add-to-cart" data-tld=".ng" data-price="6500">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart Sidebar -->
+        <div id="cartSidebar" class="cart-sidebar" style="display: none;">
+            <h4>🛒 Your Cart</h4>
+            <div id="cartItemsList" class="cart-items"></div>
+            <div class="cart-total">Total: ₦<span id="cartTotal">0</span></div>
+            <button id="checkoutBtn" class="checkout-btn">Proceed to Checkout</button>
+        </div>
+
+        <div class="footer">
+            <div class="container">
+                <div class="footer-grid">
+                    <div>
+                        <h4>Domain Store</h4>
+                        <p>Domain registration & hosting</p>
+                    </div>
+                    <div>
+                        <h4>Support</h4>
+                        <a href="#">Contact</a><br>
+                        <a href="#">FAQ</a>
+                    </div>
+                    <div>
+                        <h4>Legal</h4>
+                        <a href="#">Privacy Policy</a><br>
+                        <a href="#">Terms of Service</a>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 32px;">
+                    &copy; 2025 Domain Store. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
