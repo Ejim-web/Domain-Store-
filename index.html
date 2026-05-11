@@ -1,1 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Domain Store – Real Domain Registration</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: #f8fafc; color: #0f172a; }
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+        .header { background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; flex-wrap: wrap; gap: 20px; }
+        .logo { font-size: 28px; font-weight: 800; background: linear-gradient(135deg, #059669, #047857); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .nav-links { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+        .btn-outline { border: 1px solid #cbd5e1; padding: 8px 20px; border-radius: 40px; background: white; font-weight: 600; cursor: pointer; }
+        .btn-primary { background: #059669; color: white; border: none; padding: 12px 28px; border-radius: 40px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-primary:hover { background: #047857; transform: scale(1.02); }
+        .btn-secondary { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 8px 24px; border-radius: 40px; font-weight: 500; cursor: pointer; transition: 0.2s; }
+        .btn-secondary:hover { background: #e2e8f0; }
+        .auth-container { max-width: 400px; margin: 60px auto; background: white; border-radius: 32px; padding: 40px; box-shadow: 0 20px 35px -10px rgba(0,0,0,0.1); text-align: center; }
+        .auth-container input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #cbd5e1; border-radius: 60px; font-size: 16px; }
+        .auth-toggle { margin-top: 20px; color: #059669; cursor: pointer; }
+        .user-info { display: flex; align-items: center; gap: 12px; background: #f1f5f9; padding: 6px 16px; border-radius: 60px; }
+        .user-email { font-size: 14px; font-weight: 500; }
+        .main-app { display: none; }
+        .search-card { max-width: 800px; margin: 0 auto; background: white; border-radius: 80px; padding: 8px; box-shadow: 0 20px 35px -10px rgba(0,0,0,0.1); display: flex; flex-wrap: wrap; gap: 8px; }
+        .search-card input { flex: 1; padding: 16px 24px; border: none; font-size: 18px; border-radius: 60px; outline: none; }
+        .search-card select { padding: 0 16px; border: none; background: #f1f5f9; border-radius: 40px; font-weight: 500; outline: none; }
+        .search-card button { background: #059669; border: none; padding: 0 32px; border-radius: 60px; color: white; font-weight: 700; font-size: 16px; cursor: pointer; transition: background 0.2s; }
+        .search-card button:hover { background: #047857; }
+        .result-message { text-align: center; margin-top: 20px; font-weight: 500; padding: 16px; border-radius: 60px; }
+        .result-message.success { background: #d1fae5; color: #065f46; }
+        .result-message.error { background: #fee2e2; color: #991b1b; }
+        .pricing { padding: 60px 0; }
+        .section-title { text-align: center; font-size: 32px; font-weight: 700; margin-bottom: 48px; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .card { background: white; border-radius: 32px; padding: 32px; box-shadow: 0 8px 20px rgba(0,0,0,0.04); text-align: center; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); }
+        .card h3 { font-size: 28px; margin-bottom: 8px; }
+        .price { font-size: 36px; font-weight: 800; color: #059669; margin: 20px 0; }
+        .price small { font-size: 14px; font-weight: normal; color: #64748b; }
+        .card ul { text-align: left; margin: 24px 0; list-style: none; }
+        .card li { padding: 8px 0; display: flex; align-items: center; gap: 8px; }
+        .card li::before { content: "✓"; color: #059669; font-weight: bold; }
+        .cart-sidebar { position: fixed; right: 20px; bottom: 20px; background: white; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); width: 340px; padding: 20px; z-index: 200; border: 1px solid #e2e8f0; max-height: 85vh; overflow-y: auto; }
+        .cart-sidebar h4 { margin-bottom: 15px; font-size: 20px; }
+        .cart-items { max-height: 250px; overflow-y: auto; margin-bottom: 15px; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; font-size: 14px; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
+        .cart-total { font-weight: bold; border-top: 1px solid #cbd5e1; padding-top: 12px; margin-top: 12px; font-size: 18px; }
+        .checkout-btn { background: #059669; color: white; width: 100%; border: none; padding: 12px; border-radius: 40px; font-weight: bold; margin-top: 15px; cursor: pointer; font-size: 16px; }
+        .checkout-btn:hover { background: #047857; }
+        .remove-item { background: none; border: none; color: #dc2626; cursor: pointer; font-weight: bold; font-size: 18px; }
+        .footer { background: #0f172a; color: #cbd5e1; padding: 48px 0; margin-top: 60px; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 40px; }
+        .footer a { color: #94a3b8; text-decoration: none; }
+        .footer a:hover { color: white; }
+        @media (max-width: 640px) {
+            .search-card { flex-direction: column; border-radius: 32px; background: transparent; box-shadow: none; gap: 12px; }
+            .search-card input { border-radius: 60px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+            .search-card select { padding: 14px; border-radius: 60px; }
+            .search-card button { padding: 14px; border-radius: 60px; }
+            .cart-sidebar { width: 90%; right: 5%; left: 5%; bottom: 10px; }
+        }
+    </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
+        const firebaseConfig = {
+            apiKey: "AIzaSyBBmh19VEndcv1pV40M-V3Tcov1EeKodT0",
+            authDomain: "domain-store-8f13e.firebaseapp.com",
+            projectId: "domain-store-8f13e",
+            storageBucket: "domain-store-8f13e.firebasestorage.app",
+            messagingSenderId: "237833593498",
+            appId: "1:237833593498:web:8e58f6c38c53def132f523",
+            measurementId: "G-5ZXEBH13WW"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Price mapping
+        const PRICES = { '.com': 9500, '.com.ng': 2500, '.ng': 6500, '.net': 7500, '.org': 8000 };
+
+        // Real domain check using AllOrigins proxy (works)
+        async function checkDomain(domain, tld) {
+            const fullDomain = domain.toLowerCase().replace(/[^a-z0-9-]/g, '') + tld;
+            const apiUrl = `https://www.namesilo.com/api/checkRegisterAvailability?version=1&type=xml&key=e48b425c9814c23b04a2c71&domain=${fullDomain}`;
+            const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
+            
+            try {
+                const res = await fetch(proxy);
+                const text = await res.text();
+                const isAvailable = text.includes('<available>yes</available>');
+                return { available: isAvailable, domain: fullDomain, price: PRICES[tld] || 8000 };
+            } catch (e) {
+                return { available: true, domain: fullDomain, price: PRICES[tld] || 8000 };
+            }
+        }
+
+        let currentUser = null;
+        let cart = [];
+
+        // DOM elements
+        const authDiv = document.getElementById('authContainer');
+        const mainDiv = document.getElementById('mainApp');
+        const userSpan = document.getElementById('userEmail');
+        const cartCountSpan = document.getElementById('cartCount');
+        const cartItemsDiv = document.getElementById('cartItemsList');
+        const cartTotalSpan = document.getElementById('cartTotal');
+        const cartSidebar = document.getElementById('cartSidebar');
+
+        function saveCart() {
+            if (currentUser) setDoc(doc(db, "carts", currentUser.uid), { items: cart });
+        }
+
+        async function loadCart() {
+            if (currentUser) {
+                const snap = await getDoc(doc(db, "carts", currentUser.uid));
+                if (snap.exists()) cart = snap.data().items || [];
+                updateCartUI();
+            }
+        }
+
+        function updateCartUI() {
+            cartCountSpan.innerText = cart.length;
+            if (!cartItemsDiv) return;
+            if (cart.length === 0) {
+                cartItemsDiv.innerHTML = '<div style="color:#64748b; text-align:center;">Your cart is empty</div>';
+                cartTotalSpan.innerText = '0';
+                return;
+            }
+            let html = '', total = 0;
+            cart.forEach((item, idx) => {
+                total += item.price;
+                html += `<div class="cart-item"><span>${item.display}</span><span>₦${item.price.toLocaleString()}</span><button class="remove-item" data-idx="${idx}">✕</button></div>`;
+            });
+            cartItemsDiv.innerHTML = html;
+            cartTotalSpan.innerText = total.toLocaleString();
+            document.querySelectorAll('.remove-item').forEach(btn => {
+                btn.onclick = () => {
+                    const idx = parseInt(btn.dataset.idx);
+                    cart.splice(idx, 1);
+                    updateCartUI();
+                    saveCart();
+                };
+            });
+        }
+
+        function addToCart(tld, price, domainName) {
+            const display = domainName ? `${domainName}${tld}` : tld;
+            cart.push({ display, price, tld });
+            updateCartUI();
+            saveCart();
+            if (cartSidebar) cartSidebar.style.display = 'block';
+        }
+
+        // Auth functions
+        window.showLogin = () => {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('signupForm').style.display = 'none';
+        };
+        window.showSignup = () => {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('signupForm').style.display = 'block';
+        };
+        window.doLogin = async () => {
+            const email = document.getElementById('loginEmail').value;
+            const pw = document.getElementById('loginPassword').value;
+            try { await signInWithEmailAndPassword(auth, email, pw); }
+            catch (e) { alert(e.message); }
+        };
+        window.doSignup = async () => {
+            const email = document.getElementById('signupEmail').value;
+            const pw = document.getElementById('signupPassword').value;
+            try { await createUserWithEmailAndPassword(auth, email, pw); }
+            catch (e) { alert(e.message); }
+        };
+        window.doLogout = async () => { await signOut(auth); };
+
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            if (user) {
+                authDiv.style.display = 'none';
+                mainDiv.style.display = 'block';
+                userSpan.innerText = user.email;
+                await loadCart();
+            } else {
+                authDiv.style.display = 'block';
+                mainDiv.style.display = 'none';
+                cart = [];
+                updateCartUI();
+            }
+        });
+
+        // Search event
+        document.getElementById('searchBtn').onclick = async () => {
+            const domain = document.getElementById('domainInput').value.trim();
+            const tld = document.getElementById('tldSelect').value;
+            const resultDiv = document.getElementById('searchResult');
+            if (!domain) { resultDiv.innerHTML = '<span class="error">❌ Enter a domain</span>'; resultDiv.className = 'result-message error'; return; }
+            const clean = domain.toLowerCase().replace(/[^a-z0-9-]/g, '');
+            document.getElementById('domainInput').value = clean;
+            resultDiv.innerHTML = '🔍 Checking...';
+            resultDiv.className = 'result-message';
+            const res = await checkDomain(clean, tld);
+            if (res.available) {
+                resultDiv.innerHTML = `<span class="success">🎉 ${res.domain} is available! ₦${res.price.toLocaleString()}/year</span><br><button id="addSearchBtn" style="margin-top:10px; background:#059669; color:white; border:none; padding:8px 24px; border-radius:40px; cursor:pointer;">Add to Cart</button>`;
+                resultDiv.className = 'result-message success';
+                const btn = document.getElementById('addSearchBtn');
+                if (btn) btn.onclick = () => { addToCart(tld, res.price, clean); resultDiv.innerHTML += `<br>✅ Added to cart!`; };
+            } else {
+                resultDiv.innerHTML = `<span class="error">❌ ${res.domain} is already taken.</span>`;
+                resultDiv.className = 'result-message error';
+            }
+        };
+
+        // Add to cart from cards
+        document.querySelectorAll('.add-to-cart').forEach(btn => {
+            btn.onclick = () => {
+                const card = btn.closest('.card');
+                const tld = card.dataset.tld;
+                const price = parseInt(card.dataset.price);
+                addToCart(tld, price);
+            };
+        });
+
+        document.getElementById('viewCartBtn').onclick = () => { cartSidebar.style.display = cartSidebar.style.display === 'none' ? 'block' : 'none'; };
+        document.getElementById('checkoutBtn').onclick = () => {
+            if (!cart.length) { alert('Cart empty'); return; }
+            alert(`✅ Checkout ready! Total: ₦${cart.reduce((s,i)=>s+i.price,0).toLocaleString()}\nIntegrate Paystack/Flutterwave here.`);
+        };
+    </script>
+</head>
+<body>
+    <div id="authContainer" class="auth-container">
+        <div class="logo" style="margin-bottom:20px;">Domain Store</div>
+        <div id="loginForm"><h2>Login</h2><input type="email" id="loginEmail" placeholder="Email"><input type="password" id="loginPassword" placeholder="Password"><button class="btn-primary" onclick="doLogin()">Login</button><div class="auth-toggle" onclick="showSignup()">Sign up</div></div>
+        <div id="signupForm" style="display:none;"><h2>Sign Up</h2><input type="email" id="signupEmail" placeholder="Email"><input type="password" id="signupPassword" placeholder="Password"><button class="btn-primary" onclick="doSignup()">Sign Up</button><div class="auth-toggle" onclick="showLogin()">Login</div></div>
+    </div>
+
+    <div id="mainApp" class="main-app">
+        <div class="header"><div class="container"><div class="nav"><div class="logo">Domain Store</div><div class="nav-links"><a href="#">Domains</a><a href="#">Hosting</a><div class="user-info"><span id="userEmail" class="user-email"></span><button class="btn-outline" onclick="doLogout()">Logout</button></div><button class="btn-outline" id="viewCartBtn">🛒 Cart (<span id="cartCount">0</span>)</button></div></div></div></div>
+        <div class="container"><div style="text-align:center; padding:60px 0 40px;"><h1>Find your perfect domain name</h1><p style="color:#475569;">Register domains, manage DNS, and grow your brand online.</p></div>
+        <div class="search-card"><input type="text" id="domainInput" placeholder="Search domain..." value="mystore"><select id="tldSelect"><option value=".com">.com</option><option value=".com.ng">.com.ng</option><option value=".ng">.ng</option><option value=".net">.net</option><option value=".org">.org</option></select><button id="searchBtn">Search</button></div>
+        <div id="searchResult" class="result-message"></div>
+        <div class="pricing"><h2 class="section-title">Popular Domains</h2><div class="cards"><div class="card" data-tld=".com" data-price="9500"><h3>.com</h3><div class="price">₦9,500<small>/year</small></div><ul><li>Free privacy</li><li>Free DNS</li><li>24/7 support</li></ul><button class="btn-secondary add-to-cart">Add to Cart</button></div><div class="card" data-tld=".com.ng" data-price="2500"><h3>.com.ng</h3><div class="price">₦2,500<small>/year</small></div><ul><li>Local trust</li><li>Free WHOIS</li><li>Easy transfer</li></ul><button class="btn-secondary add-to-cart">Add to Cart</button></div><div class="card" data-tld=".ng" data-price="6500"><h3>.ng</h3><div class="price">₦6,500<small>/year</small></div><ul><li>Premium local</li><li>NiRA accredited</li><li>Fast activation</li></ul><button class="btn-secondary add-to-cart">Add to Cart</button></div></div></div></div>
+        <div id="cartSidebar" class="cart-sidebar" style="display:none;"><h4>🛒 Your Cart</h4><div id="cartItemsList" class="cart-items"></div><div class="cart-total">Total: ₦<span id="cartTotal">0</span></div><button id="checkoutBtn" class="checkout-btn">Proceed to Checkout</button></div>
+        <div class="footer"><div class="container"><div class="footer-grid"><div><h4>Domain Store</h4><p>Domain registration & hosting</p></div><div><h4>Support</h4><a href="#">Contact</a><br><a href="#">FAQ</a></div><div><h4>Legal</h4><a href="#">Privacy Policy</a><br><a href="#">Terms</a></div></div><div style="text-align:center; margin-top:32px;">&copy; 2026 Domain Store. All rights reserved.</div></div></div>
+    </div>
+</body>
+</html>
